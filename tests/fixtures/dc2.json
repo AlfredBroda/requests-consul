@@ -1,0 +1,1 @@
+[{"ServiceID": "bbe87180-8ca3-4227-87be-1a4cf64b0c6f", "ServiceName": "dummy", "ServiceTags": ["secureConnection:false"], "ServicePort": 222, "ServiceAddress": "127.0.1.1", "Address": "127.2.0.1", "Node": "consul-node.dc"}]

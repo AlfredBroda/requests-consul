@@ -1,0 +1,5 @@
+[run]
+source = requests_consul
+
+[report]
+omit = /usr*,setup.py,*egg*,.venv/*,*/tests.py,*/migrations/*

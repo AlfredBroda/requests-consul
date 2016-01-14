@@ -1,0 +1,5 @@
+pbr
+python-consul
+requests>=2.7.0
+Sphinx
+alabaster>=0.7.7

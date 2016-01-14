@@ -1,0 +1,4 @@
+ddt>=1.0.1
+nose
+coveralls
+responses
