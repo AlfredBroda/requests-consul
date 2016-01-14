@@ -1,6 +1,7 @@
-# alle-requests
+# requests-consul
 [![Build Status](https://travis-ci.org/RulersOfAsgard/requests-consul.svg?branch=master)](https://travis-ci.org/RulersOfAsgard/requests-consul)
 [![Documentation Status](https://readthedocs.org/projects/requests-consul/badge/?version=latest)](http://requests-consul.readthedocs.org/en/latest/?badge=latest)
+[![Code Health](https://landscape.io/github/RulersOfAsgard/requests-consul/master/landscape.svg?style=flat)](https://landscape.io/github/RulersOfAsgard/requests-consul/master)
 
 requests-consul is an extension for the
 [requests](http://docs.python-requests.org/en/latest/) library.
