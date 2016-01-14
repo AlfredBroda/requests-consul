@@ -51,7 +51,7 @@ class ConsulServiceAdapter(HTTPAdapter):
 
     def _connect_to_consul(self, host, port):
         """Connects to the given consul instance."""
-        logger.debug('Connecting to Consul %s %s' % (host, port))
+        logger.debug('Connecting to Consul %s %s', host, port)
         self.consul = Consul(host, port)
 
     def _fetch_instances(self, service_name):
@@ -64,7 +64,7 @@ class ConsulServiceAdapter(HTTPAdapter):
             for dc in datacenters:
                 instances.extend(self.consul.catalog.service(
                                  service_name, dc=dc)[1])
-        logger.debug('Got instances: %s' % instances)
+        logger.debug('Got instances: %s', instances)
         return instances
 
     def _build_instance_url(self, url):
@@ -101,7 +101,7 @@ class ConsulServiceAdapter(HTTPAdapter):
 
         if parsed.scheme != 'service':
             logger.debug(
-                'Ignoring adapter, because scheme is %s' % parsed.scheme)
+                'Ignoring adapter, because scheme is %s', parsed.scheme)
             return super(ConsulServiceAdapter, self).get_connection(url,
                                                                     proxies)
 
