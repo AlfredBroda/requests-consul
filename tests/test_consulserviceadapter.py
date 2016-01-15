@@ -6,7 +6,8 @@ from urllib.parse import urlsplit, parse_qs
 from ddt import ddt, data, unpack
 import responses
 
-from requests_consul.adapters.service import ConsulServiceAdapter
+from requests_consul.adapters.service import ConsulServiceAdapter, \
+    NoSuchService
 
 
 def service_list_callback(request):
@@ -23,13 +24,19 @@ def service_list_callback(request):
     return 200, headers, json.dumps(body)
 
 
+def no_such_service_callback(request):
+    headers = {'X-Consul-Index': '1'}
+    body = []
+    return 200, headers, json.dumps(body)
+
+
 @ddt
 class TestConsulServiceAdapter(TestCase):
 
     def setUp(self):
-        self.consul_url = 'http://127.0.0.1:8500/v1/catalog/service/dummy'
+        consul_url = 'http://127.0.0.1:8500/v1/catalog/service/dummy'
         responses.add_callback(responses.GET,
-                               self.consul_url,
+                               consul_url,
                                callback=service_list_callback,
                                content_type='application/json',
                                )
@@ -38,6 +45,13 @@ class TestConsulServiceAdapter(TestCase):
                       body='["dc1","dc2"]',
                       status=200,
                       content_type='application/json')
+
+        no_service_url = 'http://127.0.0.1:8500/v1/catalog/service/notex'
+        responses.add_callback(responses.GET,
+                               no_service_url,
+                               callback=no_such_service_callback,
+                               content_type='application/json',
+                               )
 
     @responses.activate
     def test_get_connection_single_host(self):
@@ -65,3 +79,9 @@ class TestConsulServiceAdapter(TestCase):
         ips = [instance['ServiceAddress'] for instance in instances]
         ips.sort()
         self.assertListEqual(ips, ['127.0.0.1', '127.0.1.1'])
+
+    @responses.activate
+    def test_get_notexisting_service(self):
+        adapter = ConsulServiceAdapter(dc_aware=False)
+        with self.assertRaises(NoSuchService):
+            adapter.get_connection('service://notex')

@@ -4,9 +4,15 @@ from urllib.parse import urlsplit, SplitResult
 
 from consul import Consul
 from requests.adapters import HTTPAdapter
+from requests.exceptions import RequestException
 
 
 logger = logging.getLogger('requests_consul.adapters.service')
+
+
+class NoSuchService(RequestException):
+    """Service hasn't been found in Consul."""
+    pass
 
 
 class ConsulServiceAdapter(HTTPAdapter):
@@ -19,6 +25,7 @@ class ConsulServiceAdapter(HTTPAdapter):
     :param int port: Consul API port
     :param bool dc_aware: If False the `dc` parameter is ignored and all
                           registered data centers are queried
+    :raises NoSuchService: If service cannot be found in Consul
 
     Example usage:
 
@@ -74,7 +81,10 @@ class ConsulServiceAdapter(HTTPAdapter):
         instances = self._fetch_instances(service_name)
 
         # Get a random instance
-        instance = random.choice(instances)
+        if instances:
+            instance = random.choice(instances)
+        else:
+            raise NoSuchService
         if 'secureConnection:true' in instance['ServiceTags']:
             scheme = 'https'
         else:
