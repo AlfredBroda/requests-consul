@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 import json
 from unittest import TestCase
-from urllib.parse import urlsplit, parse_qs
 
-from ddt import ddt, data, unpack
 import responses
+from ddt import ddt, data, unpack
+from six.moves.urllib.parse import urlsplit, parse_qs
 
-from requests_consul.adapters.service import ConsulServiceAdapter, \
+from requests_consul.adapters.service import (
+    ConsulServiceAdapter,
     NoSuchService
+)
 
 
 def service_list_callback(request):
