@@ -1,11 +1,10 @@
 import logging
 import random
-from urllib.parse import urlsplit, SplitResult
 
 from consul import Consul
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RequestException
-
+from six.moves.urllib.parse import urlsplit, SplitResult
 
 logger = logging.getLogger('requests_consul.adapters.service')
 
