@@ -2,6 +2,7 @@ import logging
 import random
 
 from consul import Consul
+from consul.base import ConsulException
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RequestException
 from six.moves.urllib.parse import urlsplit, SplitResult
@@ -11,6 +12,11 @@ logger = logging.getLogger('requests_consul.adapters.service')
 
 class NoSuchService(RequestException):
     """Service hasn't been found in Consul."""
+    pass
+
+
+class ConsulRequestException(RequestException):
+    """Couldn't get data from Consul."""
     pass
 
 
@@ -62,15 +68,19 @@ class ConsulServiceAdapter(HTTPAdapter):
 
     def _fetch_instances(self, service_name):
         instances = []
-        if self.dc_aware:
-            instances = \
-                self.consul.catalog.service(service_name, dc=self.dc)[1]
-        else:
-            datacenters = self.consul.catalog.datacenters()
-            for dc in datacenters:
-                instances.extend(self.consul.catalog.service(
-                                 service_name, dc=dc)[1])
-        logger.debug('Got instances: %s', instances)
+        try:
+            if self.dc_aware:
+                instances = \
+                    self.consul.catalog.service(service_name, dc=self.dc)[1]
+            else:
+                datacenters = self.consul.catalog.datacenters()
+                for dc in datacenters:
+                    instances.extend(self.consul.catalog.service(
+                                     service_name, dc=dc)[1])
+            logger.debug('Got instances: %s', instances)
+        except ConsulException as e:
+            logger.debug("Consul Exception: %s", e)
+            raise ConsulRequestException("Consul Exception: %s", e)
         return instances
 
     def _build_instance_url(self, url):
