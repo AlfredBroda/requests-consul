@@ -8,7 +8,8 @@ from six.moves.urllib.parse import urlsplit, parse_qs
 
 from requests_consul.adapters.service import (
     ConsulServiceAdapter,
-    NoSuchService
+    NoSuchService,
+    ConsulRequestException
 )
 
 
@@ -32,6 +33,12 @@ def no_such_service_callback(request):
     return 200, headers, json.dumps(body)
 
 
+def consul_exception_callback(request):
+    headers = {'X-Consul-Index': '1'}
+    body = []
+    return 500, headers, json.dumps(body)
+
+
 @ddt
 class TestConsulServiceAdapter(TestCase):
 
@@ -47,13 +54,18 @@ class TestConsulServiceAdapter(TestCase):
                       body='["dc1","dc2"]',
                       status=200,
                       content_type='application/json')
-
         no_service_url = 'http://127.0.0.1:8500/v1/catalog/service/notex'
         responses.add_callback(responses.GET,
                                no_service_url,
                                callback=no_such_service_callback,
                                content_type='application/json',
                                )
+        responses.add_callback(
+            responses.GET,
+            'http://127.0.0.1:8500/v1/catalog/service/notex2',
+            callback=consul_exception_callback,
+            content_type='application/json'
+        )
 
     @responses.activate
     def test_get_connection_single_host(self):
@@ -87,3 +99,9 @@ class TestConsulServiceAdapter(TestCase):
         adapter = ConsulServiceAdapter(dc_aware=False)
         with self.assertRaises(NoSuchService):
             adapter.get_connection('service://notex')
+
+    @responses.activate
+    def test_get_consul_exception(self):
+        adapter = ConsulServiceAdapter(dc='dummy_dc')
+        with self.assertRaises(ConsulRequestException):
+            adapter.get_connection('service://notex2')
